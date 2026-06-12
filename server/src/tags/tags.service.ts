@@ -150,21 +150,33 @@ export class TagsService {
 
     const notes = await this.prisma.note.findMany({
       where: {
-        userId,
         state: 'active',
+        OR: [
+          { userId },
+          {
+            sharedWith: {
+              some: { sharedWithUserId: userId, isDeleted: false },
+            },
+          },
+        ],
         tags: {
           some: {
             id: tagId,
+            userId,
+            isDeleted: false,
           },
         },
       },
       orderBy: { updatedAt: 'desc' },
       include: {
-        tags: true,
+        tags: {
+          where: { isDeleted: false, userId },
+          select: { id: true },
+        },
       },
     });
 
-    // Transform to include tagIds array
+    // Transform to include tagIds array (only the requesting user's tags)
     return notes.map((note) => ({
       ...note,
       tagIds: note.tags.map((t) => t.id),

@@ -9,6 +9,10 @@ import { NoteAccessService } from './note-access.service';
 import { NoteAttachmentsService } from './note-attachments.service';
 import { transformNote } from '../utils/note-transformer.util';
 import {
+  assertUserOwnsTags,
+  buildPerUserTagsUpdate,
+} from '../utils/note-tags.util';
+import {
   getSyncUpdatedAtWindow,
   withForcedSyncIds,
 } from '../../sync/sync-window.util';
@@ -30,6 +34,10 @@ export class NotesService {
 
   async create(userId: string, createNoteDto: CreateNoteDto) {
     const { tagIds, isPinned, ...noteData } = createNoteDto;
+
+    if (tagIds?.length) {
+      await assertUserOwnsTags(this.prisma, userId, tagIds);
+    }
 
     const note = await this.prisma.note.create({
       data: {
@@ -82,7 +90,7 @@ export class NotesService {
             ? [
                 {
                   tags: {
-                    some: { id: tagId },
+                    some: { id: tagId, userId, isDeleted: false },
                   },
                 },
               ]
@@ -160,16 +168,25 @@ export class NotesService {
     // Apply the pin first so the include below reflects the new state.
     await this.setNotePin(userId, id, isPinned);
 
+    let tagsUpdate: ReturnType<typeof buildPerUserTagsUpdate>;
+    if (tagIds !== undefined) {
+      await assertUserOwnsTags(this.prisma, userId, tagIds);
+      const currentNote = await this.prisma.note.findUnique({
+        where: { id },
+        include: NOTE_INCLUDE_TAGS,
+      });
+      tagsUpdate = buildPerUserTagsUpdate(
+        userId,
+        currentNote?.tags ?? [],
+        tagIds,
+      );
+    }
+
     const note = await this.prisma.note.update({
       where: { id },
       data: {
         ...noteData,
-        // Use 'set' to replace all tags at once (implicit many-to-many)
-        ...(tagIds !== undefined && {
-          tags: {
-            set: tagIds.map((tagId) => ({ id: tagId })),
-          },
-        }),
+        ...(tagsUpdate && { tags: tagsUpdate }),
       },
       include: { ...NOTE_INCLUDE_TAGS, ...notePinInclude(userId) },
     });
@@ -532,6 +549,10 @@ export class NotesService {
   }
 
   private async createMissingSyncNote(userId: string, change: SyncNoteDto) {
+    if (change.tagIds?.length) {
+      await assertUserOwnsTags(this.prisma, userId, change.tagIds);
+    }
+
     await this.prisma.note.create({
       data: {
         id: change.id,
@@ -592,6 +613,7 @@ export class NotesService {
     }
 
     const didUpdate = await this.updateSyncNoteIfUnchanged(
+      userId,
       change,
       existingNote,
       access.isOwner,
@@ -607,6 +629,7 @@ export class NotesService {
   }
 
   private async updateSyncNoteIfUnchanged(
+    userId: string,
     change: SyncNoteDto,
     existingNote: Note,
     isOwner: boolean,
@@ -633,14 +656,22 @@ export class NotesService {
       }
 
       if (change.tagIds !== undefined) {
-        await tx.note.update({
+        await assertUserOwnsTags(tx, userId, change.tagIds);
+        const currentNote = await tx.note.findUnique({
           where: { id: change.id },
-          data: {
-            tags: {
-              set: change.tagIds.map((id) => ({ id })),
-            },
-          },
+          include: NOTE_INCLUDE_TAGS,
         });
+        const tagsUpdate = buildPerUserTagsUpdate(
+          userId,
+          currentNote?.tags ?? [],
+          change.tagIds,
+        );
+        if (tagsUpdate) {
+          await tx.note.update({
+            where: { id: change.id },
+            data: { tags: tagsUpdate },
+          });
+        }
       }
 
       return true;

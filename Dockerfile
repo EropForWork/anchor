@@ -79,7 +79,8 @@ COPY --from=web_builder /app/web/public ./web/public
 
 COPY docker/docker-entrypoint.sh /app/docker-entrypoint.sh
 COPY docker/supervisord.conf /etc/supervisord.conf
-RUN chmod +x /app/docker-entrypoint.sh
+# Windows build hosts may produce CRLF; strip before exec
+RUN sed -i 's/\r$//' /app/docker-entrypoint.sh && chmod +x /app/docker-entrypoint.sh
 
 VOLUME ["/data"]
 
