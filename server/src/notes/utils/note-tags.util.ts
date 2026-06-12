@@ -18,7 +18,9 @@ export function buildPerUserTagsUpdate(
     .map((tag) => tag.id);
 
   const connectIds = newTagIds.filter((id) => !currentUserTagIds.includes(id));
-  const disconnectIds = currentUserTagIds.filter((id) => !newTagIds.includes(id));
+  const disconnectIds = currentUserTagIds.filter(
+    (id) => !newTagIds.includes(id),
+  );
 
   const update: NonNullable<Prisma.NoteUpdateInput['tags']> = {};
 
