@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { deltaToFullPlainText, getNotes, NoteCard } from "@/features/notes";
 import { getTags } from "@/features/tags";
+import { t } from "@/lib/i18n";
 
 export default function NotesPage() {
   const searchParams = useSearchParams();
@@ -26,7 +27,6 @@ export default function NotesPage() {
     queryFn: getTags,
   });
 
-  // Filter notes by search query
   const filteredNotes = useMemo(() => {
     if (!searchQuery.trim()) return notes;
 
@@ -40,11 +40,9 @@ export default function NotesPage() {
     });
   }, [notes, searchQuery]);
 
-  // Separate pinned and unpinned notes
   const pinnedNotes = filteredNotes.filter((note) => note.isPinned);
   const unpinnedNotes = filteredNotes.filter((note) => !note.isPinned);
 
-  // Get selected tag
   const selectedTag = tagIdParam
     ? tags.find((tag) => tag.id === tagIdParam)
     : null;
@@ -54,12 +52,11 @@ export default function NotesPage() {
       <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} />
 
       <div className="flex-1 p-4 lg:p-6">
-        {/* Tag filter indicator */}
         {selectedTag && (
           <div className="mb-4">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-muted/50">
               <span className="text-sm text-muted-foreground">
-                Filtering by
+                {t("notes.filteringBy")}
               </span>
               <Badge
                 variant="secondary"
@@ -92,31 +89,30 @@ export default function NotesPage() {
               <>
                 <Search className="h-16 w-16 text-muted-foreground/50 mb-4" />
                 <h3 className="text-xl font-medium text-muted-foreground">
-                  No matching notes found
+                  {t("notes.noMatchingNotes")}
                 </h3>
                 <p className="text-sm text-muted-foreground/70 mt-1">
-                  Try a different search term
+                  {t("notes.tryDifferentSearch")}
                 </p>
               </>
             ) : (
               <>
                 <Sparkles className="h-16 w-16 text-muted-foreground/50 mb-4" />
                 <h3 className="text-xl font-medium text-muted-foreground">
-                  Capture your ideas here
+                  {t("notes.captureIdeasHere")}
                 </h3>
                 <p className="text-sm text-muted-foreground/70 mt-1">
-                  Create your first note to get started
+                  {t("notes.createFirstNoteShort")}
                 </p>
               </>
             )}
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Pinned Notes */}
             {pinnedNotes.length > 0 && (
               <div>
                 <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
-                  <span>Pinned</span>
+                  <span>{t("notes.pinned")}</span>
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {pinnedNotes.map((note) => (
@@ -126,12 +122,11 @@ export default function NotesPage() {
               </div>
             )}
 
-            {/* Other Notes */}
             {unpinnedNotes.length > 0 && (
               <div>
                 {pinnedNotes.length > 0 && (
                   <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-                    Others
+                    {t("notes.others")}
                   </h2>
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

@@ -9,6 +9,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { Sidebar } from "./sidebar";
 
@@ -64,13 +65,15 @@ export function Header({ searchQuery, onSearchChange }: HeaderProps) {
               "hover:bg-accent/80",
               "transition-all duration-200",
             )}
-            aria-label="Open menu"
+            aria-label={t("header.openMenu")}
           >
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="w-72 p-0">
-          <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+          <SheetTitle className="sr-only">
+            {t("header.navigationMenu")}
+          </SheetTitle>
           <Sidebar onNavigate={() => setSidebarOpen(false)} />
         </SheetContent>
       </Sheet>
@@ -98,7 +101,7 @@ export function Header({ searchQuery, onSearchChange }: HeaderProps) {
             <input
               ref={searchInputRef}
               type="text"
-              placeholder="Search notes..."
+              placeholder={t("header.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               onFocus={() => setIsSearchFocused(true)}

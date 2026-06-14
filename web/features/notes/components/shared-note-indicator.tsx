@@ -6,6 +6,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import type { Note } from "../types";
 
@@ -39,7 +40,9 @@ export function SharedNoteIndicator({
           </Avatar>
         </div>
       </TooltipTrigger>
-      <TooltipContent side="top">Shared by {sharedBy.name}</TooltipContent>
+      <TooltipContent side="top">
+        {t("notes.sharedBy", { name: sharedBy.name })}
+      </TooltipContent>
     </Tooltip>
   );
 }

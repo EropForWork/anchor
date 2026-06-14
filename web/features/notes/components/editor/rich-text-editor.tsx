@@ -23,6 +23,7 @@ import {
   stringifyDelta,
 } from "@/features/notes";
 import { usePreferencesStore } from "@/features/preferences";
+import { t } from "@/lib/i18n";
 import { LinkBubble } from "./link-bubble";
 import { LinkDialog } from "./link-dialog";
 import {
@@ -86,7 +87,7 @@ export const RichTextEditor = forwardRef<
       editorKey,
       defaultContent,
       onChange,
-      placeholder = "Start typing...",
+      placeholder = t("editor.contentPlaceholderShort"),
       className,
       readOnly = false,
     },

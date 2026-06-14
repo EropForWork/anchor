@@ -1,0 +1,1 @@
+export { ruMessages } from "./ru";

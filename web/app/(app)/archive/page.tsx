@@ -1,7 +1,6 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { Archive, ArchiveRestore, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
@@ -25,6 +24,7 @@ import {
   unarchiveNote,
 } from "@/features/notes";
 import { getTags } from "@/features/tags";
+import { formatNoteDate, t } from "@/lib/i18n";
 
 const masonryBreakpoints = {
   default: 4,
@@ -68,10 +68,10 @@ export default function ArchivePage() {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       queryClient.invalidateQueries({ queryKey: ["notes", "archive"] });
       queryClient.invalidateQueries({ queryKey: ["tags"] });
-      toast.success("Note unarchived");
+      toast.success(t("notes.noteUnarchived"));
     },
     onError: () => {
-      toast.error("Failed to unarchive note");
+      toast.error(t("notes.noteUnarchiveFailed"));
     },
   });
 
@@ -98,9 +98,11 @@ export default function ArchivePage() {
 
       <div className="flex-1 p-4 lg:p-6">
         <div className="mb-6">
-          <h1 className="font-serif text-2xl font-bold">Archive</h1>
+          <h1 className="font-serif text-2xl font-bold">
+            {t("archive.title")}
+          </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Archived notes are hidden from your main notes list
+            {t("archive.subtitle")}
           </p>
         </div>
 
@@ -114,10 +116,10 @@ export default function ArchivePage() {
               <Archive className="h-10 w-10 text-muted-foreground/50" />
             </div>
             <h3 className="text-xl font-medium text-foreground">
-              Archive is empty
+              {t("archive.empty")}
             </h3>
             <p className="text-sm text-muted-foreground mt-1">
-              Archived notes will appear here
+              {t("archive.emptyDescription")}
             </p>
           </div>
         ) : (
@@ -187,7 +189,9 @@ function ArchiveNoteCard({
       viewMode="masonry"
       footerLeft={
         <span className="font-medium">
-          Archived {format(new Date(note.updatedAt), "MMM d, yyyy")}
+          {t("notes.archivedOn", {
+            date: formatNoteDate(note.updatedAt),
+          })}
         </span>
       }
       footerRight={
@@ -207,7 +211,9 @@ function ArchiveNoteCard({
                   <ArchiveRestore className="h-3.5 w-3.5" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="top">Unarchive</TooltipContent>
+              <TooltipContent side="top">
+                {t("archive.unarchiveTooltip")}
+              </TooltipContent>
             </Tooltip>
           </TooltipProvider>
           <ArchiveDialog

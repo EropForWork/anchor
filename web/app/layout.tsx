@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans, JetBrains_Mono, Playfair_Display } from "next/font/google";
+import { appMetadata } from "@/lib/i18n";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -22,10 +23,10 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Anchor",
-  description: "Your thoughts, secured",
+  title: appMetadata.title,
+  description: appMetadata.description,
   other: {
-    "apple-mobile-web-app-title": "Anchor",
+    "apple-mobile-web-app-title": appMetadata.title,
   },
 };
 
@@ -35,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="ru" suppressHydrationWarning>
       <body
         className={`${dmSans.variable} ${playfair.variable} ${jetBrainsMono.variable} font-sans`}
       >

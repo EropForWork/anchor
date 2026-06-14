@@ -1,6 +1,5 @@
 "use client";
 
-import { format } from "date-fns";
 import { Paperclip, Pin } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { Note } from "@/features/notes";
 import { QuillPreview } from "@/features/notes";
+import { formatNoteDate, t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { NoteBackground } from "./backgrounds";
 import { ListImageThumbnail, NoteCardImages } from "./note-card-images";
@@ -136,7 +136,7 @@ export function NoteCard({
                 <div className="flex-1 min-w-0">
                   {/* Title */}
                   <h3 className="font-semibold text-base leading-tight mb-1.5 line-clamp-1 group-hover:text-accent transition-colors duration-200">
-                    {note.title || "Untitled"}
+                    {note.title || t("common.untitled")}
                   </h3>
 
                   {/* Content Preview */}
@@ -189,7 +189,7 @@ export function NoteCard({
                             </div>
                           )}
                         <span className="text-xs text-muted-foreground font-medium">
-                          {format(new Date(note.updatedAt), "MMM d, yyyy")}
+                          {formatNoteDate(note.updatedAt)}
                         </span>
                       </>
                     )}
@@ -288,7 +288,7 @@ export function NoteCard({
                 viewMode === "grid" ? "text-base" : "text-lg",
               )}
             >
-              {note.title || "Untitled"}
+              {note.title || t("common.untitled")}
             </h3>
 
             {/* Content Preview */}
@@ -339,7 +339,7 @@ export function NoteCard({
                       </div>
                     )}
                     <span className="font-medium">
-                      {format(new Date(note.updatedAt), "MMM d, yyyy")}
+                      {formatNoteDate(note.updatedAt)}
                     </span>
                   </>
                 )}

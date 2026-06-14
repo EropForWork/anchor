@@ -46,6 +46,7 @@ import {
 } from "@/features/notes";
 import { usePreferencesStore } from "@/features/preferences";
 import { getTags } from "@/features/tags";
+import { noteWord, t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const masonryBreakpoints = {
@@ -250,14 +251,17 @@ export default function NotesPage() {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       queryClient.invalidateQueries({ queryKey: ["tags"] });
       toast.success(
-        `${noteIds.length} note${noteIds.length > 1 ? "s" : ""} moved to trash`,
+        t("notes.bulkMovedToTrash", {
+          count: noteIds.length,
+          word: noteWord(noteIds.length),
+        }),
       );
       setSelectedNoteIds(new Set());
       setIsSelectionMode(false);
       setDeleteDialogOpen(false);
     },
     onError: () => {
-      toast.error("Failed to delete notes");
+      toast.error(t("notes.bulkDeleteFailed"));
     },
   });
 
@@ -268,14 +272,17 @@ export default function NotesPage() {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       queryClient.invalidateQueries({ queryKey: ["tags"] });
       toast.success(
-        `${noteIds.length} note${noteIds.length > 1 ? "s" : ""} archived`,
+        t("notes.bulkArchived", {
+          count: noteIds.length,
+          word: noteWord(noteIds.length),
+        }),
       );
       setSelectedNoteIds(new Set());
       setIsSelectionMode(false);
       setArchiveDialogOpen(false);
     },
     onError: () => {
-      toast.error("Failed to archive notes");
+      toast.error(t("notes.bulkArchiveFailed"));
     },
   });
 
@@ -291,15 +298,16 @@ export default function NotesPage() {
     onSuccess: (_, { noteIds, isPinned }) => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       toast.success(
-        `${noteIds.length} note${noteIds.length > 1 ? "s" : ""} ${
-          isPinned ? "pinned" : "unpinned"
-        }`,
+        t(isPinned ? "notes.bulkPinned" : "notes.bulkUnpinned", {
+          count: noteIds.length,
+          word: noteWord(noteIds.length),
+        }),
       );
       setSelectedNoteIds(new Set());
       setIsSelectionMode(false);
     },
     onError: () => {
-      toast.error("Failed to update pins");
+      toast.error(t("notes.bulkPinFailed"));
     },
   });
 
@@ -316,14 +324,17 @@ export default function NotesPage() {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       queryClient.invalidateQueries({ queryKey: ["tags"] });
       toast.success(
-        `Tagged ${noteIds.length} note${noteIds.length > 1 ? "s" : ""}`,
+        t("notes.bulkTagged", {
+          count: noteIds.length,
+          word: noteWord(noteIds.length),
+        }),
       );
       setSelectedNoteIds(new Set());
       setIsSelectionMode(false);
       setTagDialogOpen(false);
     },
     onError: () => {
-      toast.error("Failed to add tags");
+      toast.error(t("notes.bulkTagFailed"));
     },
   });
 
@@ -459,10 +470,12 @@ export default function NotesPage() {
                         <span className="font-semibold">
                           {selectedNoteIds.size}
                         </span>{" "}
-                        <span className="text-muted-foreground">selected</span>
+                        <span className="text-muted-foreground">
+                          {t("notes.selected")}
+                        </span>
                       </>
                     ) : (
-                      "Select all"
+                      t("notes.selectAll")
                     )}
                   </span>
                 </button>
@@ -482,7 +495,7 @@ export default function NotesPage() {
                               <TagIcon className="h-4 w-4" />
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent>Add tags</TooltipContent>
+                          <TooltipContent>{t("notes.addTags")}</TooltipContent>
                         </Tooltip>
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -507,8 +520,8 @@ export default function NotesPage() {
                           </TooltipTrigger>
                           <TooltipContent>
                             {allSelectedPinned
-                              ? "Unpin selected"
-                              : "Pin selected"}
+                              ? t("notes.unpinSelected")
+                              : t("notes.pinSelected")}
                           </TooltipContent>
                         </Tooltip>
                         <Tooltip>
@@ -523,7 +536,9 @@ export default function NotesPage() {
                               <Archive className="h-4 w-4" />
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent>Archive selected</TooltipContent>
+                          <TooltipContent>
+                            {t("notes.archiveSelected")}
+                          </TooltipContent>
                         </Tooltip>
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -537,7 +552,9 @@ export default function NotesPage() {
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent>Delete selected</TooltipContent>
+                          <TooltipContent>
+                            {t("notes.deleteSelected")}
+                          </TooltipContent>
                         </Tooltip>
                       </>
                     )}
@@ -555,7 +572,9 @@ export default function NotesPage() {
                           <X className="h-4 w-4" />
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>Cancel selection</TooltipContent>
+                      <TooltipContent>
+                        {t("notes.cancelSelection")}
+                      </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 </div>
@@ -571,7 +590,7 @@ export default function NotesPage() {
                 {selectedTag && (
                   <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-muted/50 border border-border/40 w-fit">
                     <span className="text-sm text-muted-foreground">
-                      Filtering by
+                      {t("notes.filteringBy")}
                     </span>
                     <Badge
                       variant="secondary"
@@ -617,7 +636,9 @@ export default function NotesPage() {
                       className="h-8 px-3 gap-2 border-border/60 hover:border-primary/50 hover:bg-primary/5 hover:text-primary transition-all shadow-none rounded-full"
                     >
                       <CheckCircle2 className="h-4 w-4" />
-                      <span className="text-xs font-medium">Select</span>
+                      <span className="text-xs font-medium">
+                        {t("notes.select")}
+                      </span>
                     </Button>
                   </div>
                 )}
@@ -642,16 +663,16 @@ export default function NotesPage() {
                     </div>
                   </div>
                   <h3 className="text-2xl font-semibold text-foreground mb-2">
-                    No matching notes found
+                    {t("notes.noMatchingNotes")}
                   </h3>
                   <p className="text-sm text-muted-foreground mb-6">
-                    Try adjusting your search terms or{" "}
+                    {t("notes.noMatchingNotesHint")}{" "}
                     <button
                       type="button"
                       onClick={() => setSearchQuery("")}
                       className="text-accent hover:underline"
                     >
-                      clear the search
+                      {t("notes.clearSearch")}
                     </button>
                   </p>
                 </>
@@ -666,10 +687,10 @@ export default function NotesPage() {
                     </div>
                   </div>
                   <h3 className="text-2xl font-semibold text-foreground mb-2">
-                    Start capturing your ideas
+                    {t("notes.emptyTitle")}
                   </h3>
                   <p className="text-sm text-muted-foreground mb-6">
-                    Create your first note to begin organizing your thoughts
+                    {t("notes.emptyDescription")}
                   </p>
                   <Button
                     onClick={() => {
@@ -682,7 +703,7 @@ export default function NotesPage() {
                     className="gap-2"
                   >
                     <Plus className="h-4 w-4" />
-                    Create Your First Note
+                    {t("notes.createFirstNote")}
                   </Button>
                 </>
               )}
@@ -693,15 +714,15 @@ export default function NotesPage() {
               {sortedPinnedNotes.length > 0 && (
                 <section className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
+                    <div className="h-px flex-1 bg-linear-to-r from-transparent via-border to-transparent" />
                     <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/30 border border-border/40">
                       <Pin className="h-3 w-3" />
-                      <span>Pinned</span>
+                      <span>{t("notes.pinned")}</span>
                       <span className="text-muted-foreground/60">
                         ({sortedPinnedNotes.length})
                       </span>
                     </h2>
-                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
+                    <div className="h-px flex-1 bg-linear-to-r from-transparent via-border to-transparent" />
                   </div>
                   {renderNotesGrid(sortedPinnedNotes, 0)}
                 </section>
@@ -712,14 +733,14 @@ export default function NotesPage() {
                 <section className="space-y-4">
                   {sortedPinnedNotes.length > 0 && (
                     <div className="flex items-center gap-3">
-                      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
+                      <div className="h-px flex-1 bg-linear-to-r from-transparent via-border to-transparent" />
                       <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/30 border border-border/40">
-                        <span>All Notes</span>
+                        <span>{t("notes.allNotes")}</span>
                         <span className="text-muted-foreground/60">
                           ({sortedUnpinnedNotes.length})
                         </span>
                       </h2>
-                      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
+                      <div className="h-px flex-1 bg-linear-to-r from-transparent via-border to-transparent" />
                     </div>
                   )}
                   {renderNotesGrid(

@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { t } from "@/lib/i18n";
 
 interface ConfirmationDialogProps {
   open: boolean;
@@ -31,8 +32,8 @@ export function ConfirmationDialog({
   onConfirm,
   title,
   description,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
+  confirmLabel = t("common.confirm"),
+  cancelLabel = t("common.cancel"),
   variant = "default",
   icon,
   isPending = false,
@@ -75,7 +76,7 @@ export function ConfirmationDialog({
             {isPending ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Processing...
+                {t("common.processing")}
               </>
             ) : (
               confirmLabel

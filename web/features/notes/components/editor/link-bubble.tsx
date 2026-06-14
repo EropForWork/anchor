@@ -4,6 +4,7 @@ import { Copy, ExternalLink, Pencil, Unlink } from "lucide-react";
 import { useLayoutEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { LinkRange, QuillInstance } from "@/features/notes";
+import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 interface LinkBubbleProps {
@@ -76,22 +77,22 @@ export function LinkBubble({
       </a>
       <BubbleAction
         icon={<ExternalLink className="h-3.5 w-3.5" />}
-        label="Open"
+        label={t("editor.linkOpen")}
         onClick={() => onOpen(link.url)}
       />
       <BubbleAction
         icon={<Copy className="h-3.5 w-3.5" />}
-        label="Copy"
+        label={t("editor.linkCopy")}
         onClick={() => onCopy(link.url)}
       />
       <BubbleAction
         icon={<Pencil className="h-3.5 w-3.5" />}
-        label="Edit"
+        label={t("editor.linkEdit")}
         onClick={() => onEdit(link)}
       />
       <BubbleAction
         icon={<Unlink className="h-3.5 w-3.5" />}
-        label="Remove"
+        label={t("editor.linkRemove")}
         onClick={() => onRemove(link)}
         destructive
       />

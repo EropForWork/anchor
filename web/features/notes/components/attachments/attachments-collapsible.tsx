@@ -10,6 +10,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import {
   deleteAttachment,
@@ -63,11 +64,11 @@ export function AttachmentsCollapsible({
       queryClient.invalidateQueries({ queryKey: ["attachments", noteId] });
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       setDeleteTarget(null);
-      toast.success("Attachment deleted");
+      toast.success(t("editor.attachmentDeleted"));
     },
     onError: () => {
       setDeleteTarget(null);
-      toast.error("Failed to delete attachment");
+      toast.error(t("editor.attachmentDeleteFailed"));
     },
   });
 
@@ -102,7 +103,7 @@ export function AttachmentsCollapsible({
           context.previousAttachments,
         );
       }
-      toast.error("Failed to reorder attachments");
+      toast.error(t("editor.attachmentReorderFailed"));
     },
     onSettled: () => {
       // Sync with server state after mutation settles
@@ -134,21 +135,21 @@ export function AttachmentsCollapsible({
       const oversized = files.filter((f) => f.size > MAX_SIZE);
       if (oversized.length > 0) {
         const names = oversized.map((f) => f.name).join(", ");
-        toast.error(`File too large (max 50 MB): ${names}`);
+        toast.error(t("editor.fileTooLarge", { names }));
         return;
       }
 
       const count = files.length;
       const loadingMessage =
         count === 1
-          ? `Uploading ${files[0].name}...`
-          : `Uploading ${count} files...`;
+          ? t("editor.uploadingFile", { name: files[0].name })
+          : t("editor.uploadingFiles", { count });
 
       toast.promise(
         (async () => {
           const activeNoteId = noteId ?? (await onEnsureNoteId?.());
           if (!activeNoteId) {
-            throw new Error("Failed to create note for attachment upload");
+            throw new Error(t("editor.noteCreateForAttachmentFailed"));
           }
 
           const invalidate = () => {
@@ -175,21 +176,25 @@ export function AttachmentsCollapsible({
                 ? firstError?.status === "rejected"
                   ? firstError.reason instanceof Error
                     ? firstError.reason.message
-                    : "Upload failed"
-                  : "Upload failed"
-                : `${succeeded} of ${count} uploaded (${failed} failed)`;
+                    : t("editor.uploadFailed")
+                  : t("editor.uploadFailed")
+                : t("editor.uploadPartialFail", {
+                    succeeded,
+                    count,
+                    failed,
+                  });
             throw new Error(message);
           }
 
           return count === 1
-            ? `${files[0].name} uploaded`
-            : `${count} files uploaded`;
+            ? t("editor.fileUploaded", { name: files[0].name })
+            : t("editor.filesUploaded", { count });
         })(),
         {
           loading: loadingMessage,
           success: (msg) => msg,
           error: (err) =>
-            err instanceof Error ? err.message : "Upload failed",
+            err instanceof Error ? err.message : t("editor.uploadFailed"),
         },
       );
     },
@@ -221,10 +226,10 @@ export function AttachmentsCollapsible({
           >
             {hasAttachments ? (
               <>
-                <Paperclip className="h-4 w-4 text-muted-foreground/70 flex-shrink-0" />
+                <Paperclip className="h-4 w-4 text-muted-foreground/70 shrink-0" />
 
                 {/* Thumbnail previews */}
-                <div className="flex items-center gap-1 flex-shrink-0">
+                <div className="flex items-center gap-1 shrink-0">
                   {previewImages.map((attachment) => (
                     <ThumbnailPreview
                       key={attachment.id}
@@ -236,12 +241,13 @@ export function AttachmentsCollapsible({
 
                 {/* Count text */}
                 <span className="text-sm text-muted-foreground/80">
-                  {attachments.length}{" "}
-                  {attachments.length === 1 ? "attachment" : "attachments"}
+                  {attachments.length === 1
+                    ? t("editor.oneAttachment")
+                    : t("editor.nAttachments", { count: attachments.length })}
                   {remainingCount > 0 && previewImages.length > 0 && (
                     <span className="text-muted-foreground/50">
                       {" "}
-                      (+{remainingCount} more)
+                      {t("editor.attachmentsMore", { count: remainingCount })}
                     </span>
                   )}
                 </span>
@@ -257,7 +263,7 @@ export function AttachmentsCollapsible({
               <>
                 <Plus className="h-4 w-4 text-muted-foreground/70" />
                 <span className="text-sm text-muted-foreground/70">
-                  Add attachments
+                  {t("editor.addAttachments")}
                 </span>
               </>
             )}
@@ -302,17 +308,11 @@ export function AttachmentsCollapsible({
         open={deleteTarget !== null}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
         onConfirm={handleDeleteConfirm}
-        title="Delete attachment?"
-        description={
-          <>
-            This will permanently delete{" "}
-            <span className="font-medium">
-              {deleteTarget?.originalFilename}
-            </span>
-            . This action cannot be undone.
-          </>
-        }
-        confirmLabel="Delete"
+        title={t("editor.deleteAttachmentTitle")}
+        description={t("editor.deleteAttachmentNamedDescription", {
+          name: deleteTarget?.originalFilename ?? "",
+        })}
+        confirmLabel={t("common.delete")}
         variant="destructive"
         isPending={deleteMutation.isPending}
       />
@@ -331,7 +331,7 @@ function ThumbnailPreview({
   const { blobUrl, isLoading } = useAttachmentBlob(noteId, attachment.id);
 
   return (
-    <div className="w-8 h-8 rounded overflow-hidden bg-muted flex-shrink-0">
+    <div className="w-8 h-8 rounded overflow-hidden bg-muted shrink-0">
       {isLoading ? (
         <div className="w-full h-full animate-pulse bg-muted-foreground/10" />
       ) : blobUrl ? (

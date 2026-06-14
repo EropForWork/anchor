@@ -1,7 +1,6 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { Loader2, RotateCcw, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
@@ -27,6 +26,7 @@ import {
   restoreNote,
 } from "@/features/notes";
 import { getTags } from "@/features/tags";
+import { formatNoteDate, t } from "@/lib/i18n";
 
 const masonryBreakpoints = {
   default: 4,
@@ -70,10 +70,10 @@ export default function TrashPage() {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       queryClient.invalidateQueries({ queryKey: ["notes", "trash"] });
       queryClient.invalidateQueries({ queryKey: ["tags"] });
-      toast.success("Note restored");
+      toast.success(t("notes.noteRestored"));
     },
     onError: () => {
-      toast.error("Failed to restore note");
+      toast.error(t("notes.noteRestoreFailed"));
     },
   });
 
@@ -82,10 +82,10 @@ export default function TrashPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes", "trash"] });
       queryClient.invalidateQueries({ queryKey: ["tags"] });
-      toast.success("Note permanently deleted");
+      toast.success(t("notes.notePermanentlyDeleted"));
     },
     onError: () => {
-      toast.error("Failed to delete note");
+      toast.error(t("notes.noteDeleteFailed"));
     },
   });
 
@@ -112,9 +112,9 @@ export default function TrashPage() {
 
       <div className="flex-1 p-4 lg:p-6">
         <div className="mb-6">
-          <h1 className="font-serif text-2xl font-bold">Trash</h1>
+          <h1 className="font-serif text-2xl font-bold">{t("trash.title")}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Notes in trash will be permanently deleted after 30 days
+            {t("trash.subtitle")}
           </p>
         </div>
 
@@ -128,10 +128,10 @@ export default function TrashPage() {
               <Trash2 className="h-10 w-10 text-muted-foreground/50" />
             </div>
             <h3 className="text-xl font-medium text-foreground">
-              Trash is empty
+              {t("trash.empty")}
             </h3>
             <p className="text-sm text-muted-foreground mt-1">
-              Deleted notes will appear here
+              {t("trash.emptyDescription")}
             </p>
           </div>
         ) : (
@@ -241,7 +241,9 @@ function TrashNoteCard({
       viewMode="masonry"
       footerLeft={
         <span className="font-medium">
-          Deleted {format(new Date(note.updatedAt), "MMM d, yyyy")}
+          {t("notes.deletedOn", {
+            date: formatNoteDate(note.updatedAt),
+          })}
         </span>
       }
       footerRight={
@@ -265,7 +267,7 @@ function TrashNoteCard({
                   <RotateCcw className="h-3.5 w-3.5" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="top">Restore</TooltipContent>
+              <TooltipContent side="top">{t("notes.restore")}</TooltipContent>
             </Tooltip>
             <Tooltip
               open={deleteTooltipOpen && !deleteDialogOpen}
@@ -281,7 +283,9 @@ function TrashNoteCard({
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="top">Delete Forever</TooltipContent>
+              <TooltipContent side="top">
+                {t("notes.deleteForever")}
+              </TooltipContent>
             </Tooltip>
           </TooltipProvider>
           <RestoreDialog

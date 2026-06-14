@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
+import { t } from "@/lib/i18n";
 import {
   getMe,
   login as loginApi,
@@ -60,12 +61,12 @@ export function useAuth() {
     onSuccess: (data) => {
       if (data.access_token && data.refresh_token) {
         setAuth(data.user, data.access_token, data.refresh_token);
-        toast.success("Welcome back!");
+        toast.success(t("auth.welcomeBackToast"));
         router.push("/");
       }
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Failed to login");
+      toast.error(error.message || t("auth.loginFailed"));
     },
   });
 
@@ -75,19 +76,16 @@ export function useAuth() {
       if (data.access_token && data.refresh_token) {
         // User is active, log them in
         setAuth(data.user, data.access_token, data.refresh_token);
-        toast.success("Account created successfully!");
+        toast.success(t("auth.accountCreated"));
         router.push("/");
       } else {
         // User is pending approval
-        toast.success(
-          data.message ||
-            "Registration successful. Your account is pending approval.",
-        );
+        toast.success(data.message || t("auth.registrationPending"));
         router.push("/login");
       }
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Failed to create account");
+      toast.error(error.message || t("auth.registrationFailed"));
     },
   });
 

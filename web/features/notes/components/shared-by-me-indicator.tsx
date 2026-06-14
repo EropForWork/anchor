@@ -7,6 +7,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { personWord, t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import type { Note } from "../types";
 import { ShareDialog } from "./share-dialog";
@@ -54,7 +55,10 @@ export function SharedByMeIndicator({
           </button>
         </TooltipTrigger>
         <TooltipContent side="top">
-          Shared with {count} {count === 1 ? "person" : "people"}
+          {t("notes.sharedWith", {
+            count,
+            word: personWord(count),
+          })}
         </TooltipContent>
       </Tooltip>
       <ShareDialog

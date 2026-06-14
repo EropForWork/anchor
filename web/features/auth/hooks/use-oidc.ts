@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { t } from "@/lib/i18n";
 import { exchangeOidcCode, getOidcConfig } from "../api";
 import { useAuthStore } from "../store";
 import type { OidcConfig } from "../types";
@@ -67,11 +68,11 @@ export function useOidcCallback() {
         .then((result) => {
           setAuth(result.user, result.access_token, result.refresh_token);
           setInitialized(true);
-          toast.success("Welcome back!");
+          toast.success(t("auth.welcomeBackToast"));
           router.replace(getSafeRedirectUrl(result.redirectUrl));
         })
         .catch((err) => {
-          toast.error(err.message || "Failed to authenticate");
+          toast.error(err.message || t("auth.oidcAuthFailed"));
           router.replace("/login");
         })
         .finally(() => {

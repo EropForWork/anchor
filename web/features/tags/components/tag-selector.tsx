@@ -12,6 +12,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { createTag, generateRandomTagColor, getTags } from "@/features/tags";
+import { t } from "@/lib/i18n";
 
 interface TagSelectorProps {
   selectedTagIds: string[];
@@ -43,7 +44,7 @@ export function TagSelector({
       inputRef.current?.focus();
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Failed to create tag");
+      toast.error(error.message || t("tags.createFailed"));
     },
   });
 
@@ -149,7 +150,7 @@ export function TagSelector({
               className="h-7 px-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-transparent hover:border-border/40 rounded-full transition-all duration-200"
             >
               <Plus className="h-3.5 w-3.5 mr-1.5" />
-              Add tag
+              {t("tags.addTag")}
             </Button>
           </PopoverTrigger>
           <PopoverContent
@@ -165,7 +166,7 @@ export function TagSelector({
                 <input
                   ref={inputRef}
                   className="flex-1 bg-transparent border-none outline-none text-sm placeholder:text-muted-foreground/70"
-                  placeholder="Search tags..."
+                  placeholder={t("tags.searchPlaceholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={handleSearchKeyDown}
@@ -177,7 +178,7 @@ export function TagSelector({
                 {isLoading ? (
                   <div className="flex flex-col items-center justify-center py-8 gap-2 text-muted-foreground">
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    <span className="text-xs">Loading tags...</span>
+                    <span className="text-xs">{t("tags.loading")}</span>
                   </div>
                 ) : (
                   <>
@@ -220,7 +221,7 @@ export function TagSelector({
                             )}
                           </div>
                           <span className="truncate">
-                            Create "{searchQuery}"
+                            {t("tags.createNamed", { name: searchQuery })}
                           </span>
                         </button>
                       </div>
@@ -231,8 +232,8 @@ export function TagSelector({
                         <TagIcon className="h-8 w-8 text-muted-foreground/20 mx-auto mb-2" />
                         <p className="text-xs text-muted-foreground">
                           {tags.length > 0
-                            ? "All existing tags added"
-                            : "No tags found"}
+                            ? t("tags.allTagsAdded")
+                            : t("tags.noTagsFound")}
                         </p>
                       </div>
                     )}

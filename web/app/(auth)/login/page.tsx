@@ -24,6 +24,7 @@ import {
   useOidcLogin,
 } from "@/features/auth";
 import { getSafeRedirectUrl } from "@/features/auth/utils/redirect";
+import { t } from "@/lib/i18n";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -76,24 +77,24 @@ export default function LoginPage() {
               <div className="mx-auto flex items-center justify-center">
                 <Image
                   src="/icons/anchor_icon.png"
-                  alt="Anchor"
+                  alt={t("app.name")}
                   width={64}
                   height={64}
                 />
               </div>
               <div className="space-y-1">
                 <CardTitle className="text-3xl font-serif">
-                  Welcome Back
+                  {t("auth.welcomeBack")}
                 </CardTitle>
                 <CardDescription className="text-muted-foreground">
-                  Sign in to continue to Anchor
+                  {t("auth.signInSubtitle")}
                 </CardDescription>
               </div>
             </CardHeader>
             <CardContent className="pt-4">
               {oidcConfigError && (
                 <p className="text-sm text-destructive mb-4" role="alert">
-                  Could not load sign-in options. Please try again.
+                  {t("auth.signInOptionsError")}
                 </p>
               )}
               {/* OIDC Login Button */}
@@ -105,7 +106,9 @@ export default function LoginPage() {
                     className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
                   >
                     <LogIn className="mr-2 h-4 w-4" />
-                    Login with {oidcConfig.providerName}
+                    {t("auth.loginWith", {
+                      provider: oidcConfig.providerName,
+                    })}
                   </Button>
                   {showLocalLogin && (
                     <div className="relative">
@@ -114,7 +117,7 @@ export default function LoginPage() {
                       </div>
                       <div className="relative flex justify-center text-xs uppercase">
                         <span className="bg-card px-2 text-muted-foreground">
-                          Or continue with
+                          {t("auth.orContinueWith")}
                         </span>
                       </div>
                     </div>
@@ -126,13 +129,13 @@ export default function LoginPage() {
               {showLocalLogin && (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">{t("common.email")}</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="email"
                         type="email"
-                        placeholder="you@example.com"
+                        placeholder={t("auth.emailPlaceholder")}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="pl-10 h-12 bg-background/50"
@@ -141,7 +144,7 @@ export default function LoginPage() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password">{t("common.password")}</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -163,10 +166,10 @@ export default function LoginPage() {
                     {isLoginPending ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Signing in...
+                        {t("auth.signingIn")}
                       </>
                     ) : (
-                      "Sign In"
+                      t("auth.signIn")
                     )}
                   </Button>
                 </form>
@@ -176,12 +179,12 @@ export default function LoginPage() {
               {showLocalLogin && registrationMode?.mode !== "disabled" && (
                 <div className="mt-6 text-center">
                   <p className="text-sm text-muted-foreground">
-                    Don&apos;t have an account?{" "}
+                    {t("auth.noAccount")}{" "}
                     <Link
                       href="/register"
                       className="font-medium text-accent hover:text-accent/80 transition-colors"
                     >
-                      Create one
+                      {t("auth.createOne")}
                     </Link>
                   </p>
                 </div>
