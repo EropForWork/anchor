@@ -10,6 +10,7 @@ import 'app_snackbar.dart';
 import 'editor/checklist_reorder_mixin.dart';
 import 'editor/editor_styles.dart';
 import 'editor/editor_toolbar.dart';
+import 'editor/markdown_block_embed.dart';
 import 'editor/link_actions_sheet.dart';
 import 'editor/link_edit_sheet.dart';
 import 'editor/link_utils.dart';
@@ -400,6 +401,7 @@ class RichTextEditorState extends State<RichTextEditor>
                     getCheckedListStyle(attribute, context),
                 onLaunchUrl: _handleLaunchUrl,
                 linkActionPickerDelegate: _onLinkLongPress,
+                embedBuilders: [MarkdownBlockEmbedBuilder()],
               ),
             ),
           ],

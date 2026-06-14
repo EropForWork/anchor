@@ -9,6 +9,7 @@ import { RichTextEditor, type RichTextEditorHandle } from "../editor";
 
 interface NoteEditorContentProps {
   noteId?: string;
+  contentEditorKey?: string | null;
   canUpload?: boolean;
   isOwner?: boolean;
   currentUserId?: string | null;
@@ -28,6 +29,7 @@ interface NoteEditorContentProps {
 
 export function NoteEditorContent({
   noteId,
+  contentEditorKey,
   canUpload = false,
   isOwner = false,
   currentUserId = null,
@@ -93,16 +95,24 @@ export function NoteEditorContent({
           </div>
         )}
 
-        {/* Content */}
+        {/* Uncontrolled Quill: remount once per note via contentEditorKey. */}
         <div className="mt-2">
-          <RichTextEditor
-            ref={contentEditorRef}
-            value={content}
-            onChange={onContentChange}
-            placeholder="Start typing your thoughts..."
-            readOnly={isReadOnly}
-            className={cn("w-full", "min-h-[calc(100vh-380px)]")}
-          />
+          {contentEditorKey ? (
+            <RichTextEditor
+              ref={contentEditorRef}
+              editorKey={contentEditorKey}
+              defaultContent={content}
+              onChange={onContentChange}
+              placeholder="Start typing your thoughts..."
+              readOnly={isReadOnly}
+              className={cn("w-full", "min-h-[calc(100vh-380px)]")}
+            />
+          ) : (
+            <div
+              className={cn("w-full", "min-h-[calc(100vh-380px)]")}
+              aria-hidden
+            />
+          )}
         </div>
       </div>
     </div>

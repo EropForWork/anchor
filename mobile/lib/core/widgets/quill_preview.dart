@@ -4,6 +4,8 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../markdown/markdown_delta.dart';
+
 /// A single line in the preview with optional list/checklist state.
 class _PreviewLine {
   final String text;
@@ -198,12 +200,11 @@ List<_PreviewLine> _parseQuillContentToPreviewLines(String? content) {
     var currentLineParts = <String>[];
 
     for (final op in ops) {
-      if (op.data is! String) {
-        currentLineParts.add('');
+      final textPart = deltaDataToPlainText(op.data);
+      if (textPart == null) {
         continue;
       }
-      final text = op.data as String;
-      final parts = text.split('\n');
+      final parts = textPart.split('\n');
 
       for (var i = 0; i < parts.length; i++) {
         final part = parts[i];
@@ -238,7 +239,11 @@ String extractPlainTextFromQuillContent(String? content) {
     final json = jsonDecode(content);
     if (json is Map && json['ops'] is List) {
       final document = Document.fromJson(json['ops'] as List);
-      final raw = document.toPlainText();
+      final raw = document
+          .toDelta()
+          .toList()
+          .map((op) => deltaDataToPlainText(op.data) ?? '')
+          .join();
       final lines = raw
           .split(RegExp(r'\r?\n'))
           .map((l) => l.trim())

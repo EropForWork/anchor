@@ -77,6 +77,7 @@ dependencies:
   # Rich Text Editor
   flutter_quill: ^11.5.1
   dart_quill_delta: ^10.8.3
+  flutter_markdown: ^0.7.7
 
   # Utilities
   path_provider: ^2.1.3

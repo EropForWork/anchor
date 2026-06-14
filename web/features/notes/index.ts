@@ -4,5 +4,6 @@ export * from "./components";
 export * from "./constants";
 export * from "./hooks";
 export * from "./link-utils";
+export * from "./markdown";
 export * from "./quill";
 export * from "./types";

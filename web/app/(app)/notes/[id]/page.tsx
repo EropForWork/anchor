@@ -68,6 +68,9 @@ export default function NoteEditorPage() {
     useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [contentEditorKey, setContentEditorKey] = useState<string | null>(
+    isNew ? "new" : null,
+  );
 
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const restoreFocusFrameRef = useRef<number | null>(null);
@@ -192,6 +195,16 @@ export default function NoteEditorPage() {
     setSelectedTagIds(tagIdFromUrl ? [tagIdFromUrl] : []);
   }, [isNew, tagIdFromUrl]);
 
+  // Remount uncontrolled Quill when navigating between notes.
+  useEffect(() => {
+    if (noteId === "new") {
+      setContentEditorKey("new");
+      return;
+    }
+    hydratedNoteIdRef.current = null;
+    setContentEditorKey(null);
+  }, [noteId]);
+
   useEffect(() => {
     if (
       typeof window === "undefined" ||
@@ -253,6 +266,7 @@ export default function NoteEditorPage() {
       background: note.background || null,
     };
     hydratedNoteIdRef.current = note.id;
+    setContentEditorKey(note.id);
   }, [note]);
 
   // Keep lightweight metadata in sync with fresh query data.
@@ -672,6 +686,7 @@ export default function NoteEditorPage() {
       {/* Content */}
       <NoteEditorContent
         noteId={!isNew ? noteId : undefined}
+        contentEditorKey={contentEditorKey}
         canUpload={canUpload}
         isOwner={isOwner}
         currentUserId={user?.id ?? null}

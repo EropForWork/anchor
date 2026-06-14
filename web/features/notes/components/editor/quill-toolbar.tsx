@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import type { QuillInstance } from "@/features/notes";
 import { LIST_FORMATS } from "@/features/notes";
 import { cn } from "@/lib/utils";
+import { insertMarkdownBlock } from "./markdown-block";
 
 function toggleInlineFormat(quill: QuillInstance, key: string) {
   const current = quill.getFormat() ?? {};
@@ -286,6 +287,16 @@ export function QuillToolbar({
           onClick={() => quill && toggleBlock(quill, "code-block")}
         >
           <Code className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          className={btnClass(false)}
+          disabled={!quill}
+          title="Markdown block"
+          onClick={() => quill && insertMarkdownBlock(quill)}
+        >
+          <span className="text-[11px] font-semibold tracking-tight">MD</span>
         </Button>
         <Button
           type="button"

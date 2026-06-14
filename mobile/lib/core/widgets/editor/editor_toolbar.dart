@@ -4,6 +4,7 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'link_utils.dart';
+import 'markdown_block_embed.dart';
 
 /// Formatting state for the editor toolbar
 class EditorFormattingState {
@@ -235,6 +236,11 @@ class EditorToolbar extends StatelessWidget {
                   tooltip: 'Code Block',
                 ),
                 _ToolbarButtonData(
+                  label: 'MD',
+                  onTap: () => insertMarkdownBlock(controller),
+                  tooltip: 'Markdown block',
+                ),
+                _ToolbarButtonData(
                   icon: LucideIcons.link,
                   isActive: state.linkUrl != null,
                   onTap: onLinkPressed ?? () {},
@@ -326,19 +332,21 @@ class EditorToolbar extends StatelessWidget {
 
 // Private helper classes
 class _ToolbarButtonData {
-  final IconData icon;
+  final IconData? icon;
+  final String? label;
   final bool isActive;
   final bool? isEnabled;
   final VoidCallback onTap;
   final String tooltip;
 
   const _ToolbarButtonData({
-    required this.icon,
+    this.icon,
+    this.label,
     this.isActive = false,
     this.isEnabled,
     required this.onTap,
     required this.tooltip,
-  });
+  }) : assert(icon != null || label != null);
 }
 
 class _ToolbarGroup extends StatelessWidget {
@@ -408,13 +416,25 @@ class _ToolbarButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           child: Center(
-            child: Icon(
-              data.icon,
-              size: 20,
-              color: hasEnabledState
-                  ? (isEnabled ? inactiveColor : disabledColor)
-                  : (data.isActive ? activeColor : inactiveColor),
-            ),
+            child: data.label != null
+                ? Text(
+                    data.label!,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.2,
+                      color: hasEnabledState
+                          ? (isEnabled ? inactiveColor : disabledColor)
+                          : (data.isActive ? activeColor : inactiveColor),
+                    ),
+                  )
+                : Icon(
+                    data.icon,
+                    size: 20,
+                    color: hasEnabledState
+                        ? (isEnabled ? inactiveColor : disabledColor)
+                        : (data.isActive ? activeColor : inactiveColor),
+                  ),
           ),
         ),
       ),

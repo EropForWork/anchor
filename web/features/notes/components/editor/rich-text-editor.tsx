@@ -25,13 +25,27 @@ import {
 import { usePreferencesStore } from "@/features/preferences";
 import { LinkBubble } from "./link-bubble";
 import { LinkDialog } from "./link-dialog";
+import {
+  isMarkdownBlockEditing,
+  isMarkdownSourceElement,
+} from "./markdown-block";
 import { QuillToolbar } from "./quill-toolbar";
 
 // Dynamic import for SSR compatibility
-const ReactQuill = dynamic(() => import("react-quill-new"), {
-  ssr: false,
-  // biome-ignore lint/suspicious/noExplicitAny: react-quill-new's dynamic() wrapper drops the ref/prop types at this boundary
-}) as any;
+const ReactQuill = dynamic(
+  async () => {
+    const [{ default: RQ }, { registerMarkdownBlockBlot }] = await Promise.all([
+      import("react-quill-new"),
+      import("./markdown-block"),
+    ]);
+    registerMarkdownBlockBlot();
+    return RQ;
+  },
+  {
+    ssr: false,
+  },
+  // biome-ignore lint/suspicious/noExplicitAny: react-quill-new dynamic() drops ref/prop types
+) as any;
 
 function pasteAsLink(
   quill: QuillInstance,
@@ -49,7 +63,8 @@ function pasteAsLink(
 }
 
 interface RichTextEditorProps {
-  value: string;
+  editorKey: string;
+  defaultContent: string;
   onChange: (nextStoredContent: string) => void;
   placeholder?: string;
   className?: string;
@@ -68,7 +83,8 @@ export const RichTextEditor = forwardRef<
 >(
   (
     {
-      value,
+      editorKey,
+      defaultContent,
       onChange,
       placeholder = "Start typing...",
       className,
@@ -105,7 +121,7 @@ export const RichTextEditor = forwardRef<
       (state) => state.editor.sortChecklistItems,
     );
 
-    const deltaValue: QuillDelta = parseStoredContent(value);
+    const initialDelta: QuillDelta = parseStoredContent(defaultContent);
 
     // Cleanup timeout on unmount
     useEffect(() => {
@@ -129,6 +145,7 @@ export const RichTextEditor = forwardRef<
       ) => {
         // Ignore non-user changes (hydration, API updates)
         if (source !== "user" || readOnly) return;
+        if (isMarkdownBlockEditing()) return;
 
         const currentDelta = editor.getContents() as QuillDelta;
         const currentStr = stringifyDelta(currentDelta);
@@ -189,6 +206,7 @@ export const RichTextEditor = forwardRef<
     // Handle selection changes for toolbar state
     const handleSelectionChange = useCallback(
       (range: { index: number; length: number } | null) => {
+        if (isMarkdownBlockEditing()) return;
         if (isFocused) {
           setToolbarUpdateKey((k) => k + 1);
         }
@@ -374,6 +392,7 @@ export const RichTextEditor = forwardRef<
       const el = editorContainerEl;
       if (!el) return;
       const handler = (e: ClipboardEvent) => {
+        if (isMarkdownSourceElement(e.target)) return;
         const raw = e.clipboardData?.getData("text/plain")?.trim() ?? "";
         if (!isLikelyUrl(raw)) return;
         const quill = quillRef.current?.getEditor?.() as QuillInstance | null;
@@ -406,9 +425,10 @@ export const RichTextEditor = forwardRef<
           onClick={handleEditorClick}
         >
           <ReactQuill
+            key={editorKey}
             ref={quillRef}
             theme="snow"
-            value={deltaValue}
+            defaultValue={initialDelta}
             onChange={handleChange}
             onChangeSelection={handleSelectionChange}
             onFocus={handleFocus}

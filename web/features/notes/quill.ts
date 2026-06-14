@@ -2,6 +2,13 @@
 // Types
 // ============================================================================
 
+import {
+  MARKDOWN_BLOCK_EMBED,
+  markdownToPreviewLine,
+} from "@/features/notes/markdown";
+
+export { MARKDOWN_BLOCK_EMBED };
+
 export type QuillOp = {
   insert?: unknown;
   delete?: number;
@@ -38,9 +45,16 @@ export type QuillInstance = {
   ) => void;
   focus: () => void;
   getText: (index?: number, length?: number) => string;
+  getLength: () => number;
   insertText: (
     index: number,
     text: string,
+    source?: "user" | "api" | "silent",
+  ) => void;
+  insertEmbed: (
+    index: number,
+    type: string,
+    value: unknown,
     source?: "user" | "api" | "silent",
   ) => void;
   deleteText: (
@@ -90,6 +104,7 @@ export const QUILL_FORMATS = [
   "blockquote",
   "code-block",
   "link",
+  MARKDOWN_BLOCK_EMBED,
 ] as const;
 
 /**
@@ -167,15 +182,21 @@ export function isStoredContentEmpty(
   return deltaToFullPlainText(content).trim() === "";
 }
 
+function opToPlainText(op: QuillOp): string {
+  if (typeof op.insert === "string") return op.insert;
+  if (op.insert && typeof op.insert === "object" && op.insert !== null) {
+    const embed = op.insert as Record<string, unknown>;
+    const markdown = embed[MARKDOWN_BLOCK_EMBED];
+    if (typeof markdown === "string") return markdown;
+  }
+  return "";
+}
+
 export function deltaToFullPlainText(
   content: string | null | undefined,
 ): string {
   const delta = parseStoredContent(content);
-  return delta.ops
-    .map((op) => (typeof op.insert === "string" ? op.insert : ""))
-    .join("")
-    .replace(/\s+/g, " ")
-    .trim();
+  return delta.ops.map(opToPlainText).join("").replace(/\s+/g, " ").trim();
 }
 
 function normalizePreviewTextPreserveNewlines(text: string): string {
@@ -192,9 +213,7 @@ export function deltaToPreviewText(
   maxLen = 200,
 ): string {
   const delta = parseStoredContent(content);
-  const raw = delta.ops
-    .map((op) => (typeof op.insert === "string" ? op.insert : ""))
-    .join("");
+  const raw = delta.ops.map(opToPlainText).join("");
   const normalized = normalizePreviewTextPreserveNewlines(raw);
   return normalized.slice(0, maxLen);
 }
@@ -274,9 +293,21 @@ function deltaToLines(ops: QuillOp[]): DeltaLine[] {
 /**
  * Plain text of a line (content ops only, no newline).
  */
+function embedToPreviewText(embed: Record<string, unknown>): string {
+  const markdown = embed[MARKDOWN_BLOCK_EMBED];
+  if (typeof markdown !== "string") return "";
+  return markdownToPreviewLine(markdown);
+}
+
 function getLineText(line: DeltaLine): string {
   return line.contentOps
-    .map((op) => (typeof op.insert === "string" ? op.insert : ""))
+    .map((op) => {
+      if (typeof op.insert === "string") return op.insert;
+      if (op.insert && typeof op.insert === "object" && op.insert !== null) {
+        return embedToPreviewText(op.insert as Record<string, unknown>);
+      }
+      return "";
+    })
     .join("");
 }
 
